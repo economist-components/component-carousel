@@ -1,0 +1,103 @@
+.carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.carousel__wrapper {
+  width: 100%;
+  height: 100%;
+  font-size: 0;
+}
+
+.carousel__list {
+  height: 100%;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  list-style-type: none;
+  white-space: nowrap;
+}
+
+.carousel__item {
+  display: inline-block;
+  vertical-align: middle;
+  box-sizing: border-box;
+  white-space: normal;
+}
+
+.carousel__item--vertical {
+  box-sizing: border-box;
+  white-space: normal;
+}
+
+.carousel__control {
+  display: block;
+  position: absolute;
+}
+
+.carousel__list {
+  font-size: 16px;
+}
+
+.carousel {
+  background-color: #c5cbe9;
+}
+
+.carousel__control {
+  top: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  line-height: 50px;
+  text-align: center;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+}
+
+.carousel__control--previous {
+  right: 100%;
+}
+
+.carousel__control--next {
+  left: 100%;
+}
+
+.example-node {
+  height: 370px;
+  background-color: #fff;
+}
+
+.example-node--vertical {
+  height: 100%;
+  background-color: #fff;
+}
+
+.example-node__title {
+  margin-bottom: 0;
+  padding-right: 16px;
+  padding-right: 1rem;
+  padding-left: 16px;
+  padding-left: 1rem;
+  font-family: palatino, serif;
+  font-size: 1.26em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.26;
+}
+
+.example-node__subtitle {
+  margin-top: 0.71em;
+  padding-right: 16px;
+  padding-right: 1rem;
+  padding-left: 16px;
+  padding-left: 1rem;
+  color: #7a7a7a;
+  font-size: 0.62em;
+  font-weight: 300;
+}
+
+.example-node__image {
+  height: 50px;
+  background-color: rgb(70, 130, 180);
+}
