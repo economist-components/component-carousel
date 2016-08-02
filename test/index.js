@@ -42,18 +42,19 @@ describe('Carousel', () => {
       carousel.should.have.exactly(1).descendants('.carousel__control--previous');
     });
 
-    it('computes the correct dimensions', () => {
+    it('computes the correct padding and margin', () => {
       const carouselList = carousel.find('.carousel__list');
       carouselList.children().forEach((carouselItem) => {
         carouselItem.should.have.style('paddingRight', '5px');
         carouselItem.should.have.style('paddingLeft', '5px');
       });
-      carouselList.should.have.style('width', '12.5px');
       carouselList.should.have.style('marginLeft', '-5px');
       carouselList.should.have.style('marginRight', '-5px');
-      carouselList.children().forEach((carouselItem) => {
-        carouselItem.should.have.style('width', '2.5px');
-      });
+    });
+
+    it('computes the correct dimensions', () => {
+      const carouselInstance = new Carousel();
+      carouselInstance.computeDimensions({ offsetWidth: 90 }, 4, 10, false).should.equal(25);
     });
 
     it('displays the correct controls', () => {

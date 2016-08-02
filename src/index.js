@@ -1,14 +1,18 @@
+/* eslint-env browser */
 import CarouselList from './parts/carousel-list';
 import CarouselItem from './parts/carousel-item';
 import CarouselControl from './parts/carousel-control';
 import React from 'react';
+import debounce from 'lodash.debounce';
 
 export default class Carousel extends React.Component {
 
   constructor(props) {
     super(props);
+    this.debounceWait = 100;
     this.handlePreviousClick = this.handleControlClick.bind(this, 'previous');
     this.handleNextClick = this.handleControlClick.bind(this, 'next');
+    this.makeDebouncedDimensionslUpdateFunction = this.makeDebouncedDimensionslUpdateFunction.bind(this);
     this.state = {
       listElementDimension: 0,
       listDimension: 0,
@@ -24,9 +28,12 @@ export default class Carousel extends React.Component {
     if (width) {
       listElementDimension = width;
     } else {
-      listElementDimension = this.props.vertical ?
-        (scrollerElement.offsetHeight + gutter) / visibleItems :
-        (scrollerElement.offsetWidth + gutter) / visibleItems;
+      listElementDimension = this.computeDimensions(
+        scrollerElement,
+        visibleItems,
+        gutter,
+        this.props.vertical
+      );
     }
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       listElementDimension,
@@ -39,7 +46,43 @@ export default class Carousel extends React.Component {
       if (typeof this.props.onScrollerCreated === 'function') {
         this.props.onScrollerCreated(this.scroller);
       }
+      window.addEventListener('resize', this.makeDebouncedDimensionslUpdateFunction());
     });
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.debouncedDimensionsUpdateFunction);
+  }
+
+  makeDebouncedDimensionslUpdateFunction() {
+    this.debouncedDimensionsUpdateFunction = debounce(() => {
+      const { scroller: scrollerElement } = this.refs;
+      const { children, gutter, vertical, visibleItems } = this.props;
+      const newListElementDimension = this.computeDimensions(
+        scrollerElement,
+        visibleItems,
+        gutter,
+        vertical
+      );
+      if (newListElementDimension) {
+        const newListDimension = newListElementDimension * children.length;
+        this.scroller.updateDimensions(newListDimension - gutter, scrollerElement.offsetHeight);
+        this.setState({
+          listElementDimension: newListElementDimension,
+          listDimension: newListDimension,
+        });
+      }
+    }, this.debounceWait);
+    return this.debouncedDimensionsUpdateFunction;
+  }
+
+  computeDimensions(scrollerElement, visibleItems, gutter, vertical) {
+    if (scrollerElement.offsetHeight === 0 || scrollerElement.offsetWidth === 0) {
+      return null;
+    }
+    return vertical ?
+      (scrollerElement.offsetHeight + gutter) / visibleItems :
+      (scrollerElement.offsetWidth + gutter) / visibleItems;
   }
 
   handleControlClick(direction, event) {
