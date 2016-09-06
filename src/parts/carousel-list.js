@@ -1,13 +1,14 @@
 import React from 'react';
 
 export default function CarouselList({ children, dimension, gutter, vertical }) {
+  const size = dimension ? `${ dimension }px` : null;
   const style = {};
   if (vertical) {
-    style.height = `${ dimension }px`;
+    style.height = size;
     style.marginTop = `${ -gutter / 2 }px`;
     style.marginBottom = `${ -gutter / 2 }px`;
   } else {
-    style.width = `${ dimension }px`;
+    style.width = size;
     style.marginLeft = `${ -gutter / 2 }px`;
     style.marginRight = `${ -gutter / 2 }px`;
   }

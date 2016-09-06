@@ -99,6 +99,7 @@ export default class Carousel extends React.Component {
 
   render() {
     const { children, gutter, nextButton, previousButton, vertical } = this.props;
+    const styles = '.carousel__control { display: none !important } .carousel__list { overflow-x: scroll; }';
     const carouselItems = children.map(
       (child, index) =>
         <CarouselItem
@@ -139,6 +140,9 @@ export default class Carousel extends React.Component {
             {nextButton}
           </CarouselControl>
         }
+        <noscript>
+          <style>{styles}</style>
+        </noscript>
       </div>
     );
   }
