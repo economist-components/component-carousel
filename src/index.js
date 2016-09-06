@@ -141,7 +141,9 @@ export default class Carousel extends React.Component {
           </CarouselControl>
         }
         <noscript>
-          <style>{styles}</style>
+          {/* eslint-disable react/no-danger  */}
+          <style dangerouslySetInnerHTML={{ __html: styles }} />
+          {/* eslint-enable react/no-danger  */}
         </noscript>
       </div>
     );
