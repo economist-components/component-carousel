@@ -23,6 +23,7 @@
   display: inline-block;
   vertical-align: middle;
   box-sizing: border-box;
+  width: 290px;
   white-space: normal;
 }
 
