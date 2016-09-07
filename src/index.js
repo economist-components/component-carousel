@@ -111,6 +111,18 @@ export default class Carousel extends React.Component {
           {child}
         </CarouselItem>
     );
+    // Rendering noscript tag from server because of the issue in the link below.
+    // https://github.com/facebook/react/issues/7607
+    // The noscript tag causes react to fail and so have to render on the server.
+    const noScript = typeof window === 'undefined' ?
+      (
+        <noscript>
+          {/* eslint-disable react/no-danger  */}
+          <style dangerouslySetInnerHTML={{ __html: styles }} />
+          {/* eslint-enable react/no-danger  */}
+        </noscript>
+      ) :
+      null;
     return (
       <div className="carousel">
         {
@@ -140,11 +152,7 @@ export default class Carousel extends React.Component {
             {nextButton}
           </CarouselControl>
         }
-        <noscript>
-          {/* eslint-disable react/no-danger  */}
-          <style dangerouslySetInnerHTML={{ __html: styles }} />
-          {/* eslint-enable react/no-danger  */}
-        </noscript>
+        {noScript}
       </div>
     );
   }
