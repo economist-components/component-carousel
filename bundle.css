@@ -37,6 +37,10 @@
   position: absolute;
 }
 
+.component-panel {
+  overflow: hidden;
+}
+
 .carousel__list {
   font-size: 16px;
 }
