@@ -46,7 +46,7 @@ export default class Carousel extends React.Component {
       if (typeof this.props.onScrollerCreated === 'function') {
         this.props.onScrollerCreated(this.scroller);
       }
-      window.addEventListener('resize', this.makeDebouncedDimensionslUpdateFunction());
+      window.addEventListener('resize', this.makeDebouncedDimensionslUpdateFunction);
     });
   }
 
