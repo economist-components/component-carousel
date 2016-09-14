@@ -13,13 +13,17 @@ export default class Carousel extends React.Component {
     this.handlePreviousClick = this.handleControlClick.bind(this, 'previous');
     this.handleNextClick = this.handleControlClick.bind(this, 'next');
     this.makeDebouncedDimensionslUpdateFunction = this.makeDebouncedDimensionslUpdateFunction.bind(this);
+    this.computeNumToScroll = this.computeNumToScroll.bind(this);
     this.state = {
       listElementDimension: 0,
       listDimension: 0,
     };
+    this.numOfItemsToScrollBy = 0;
+    this.scrollWidth = 0;
   }
 
   componentDidMount() {
+    this.computeNumToScroll();
     // ftscroller must be required only on the client, as it accesses window.document on require
     const Scroller = require('ftscroller').FTScroller; // eslint-disable-line global-require
     const { scroller: scrollerElement } = this.refs;
@@ -27,6 +31,7 @@ export default class Carousel extends React.Component {
     let listElementDimension = 0;
     if (width) {
       listElementDimension = width;
+      this.scrollWidth = width * this.numOfItemsToScrollBy;
     } else {
       listElementDimension = this.computeDimensions(
         scrollerElement,
@@ -55,6 +60,7 @@ export default class Carousel extends React.Component {
   }
 
   makeDebouncedDimensionslUpdateFunction() {
+    this.computeNumToScroll();
     this.debouncedDimensionsUpdateFunction = debounce(() => {
       const { scroller: scrollerElement } = this.refs;
       const { children, gutter, vertical, visibleItems } = this.props;
@@ -73,6 +79,7 @@ export default class Carousel extends React.Component {
         });
       }
     }, this.debounceWait);
+    this.scrollWidth = this.props.width * this.numOfItemsToScrollBy;
     return this.debouncedDimensionsUpdateFunction;
   }
 
@@ -85,10 +92,27 @@ export default class Carousel extends React.Component {
       (scrollerElement.offsetWidth + gutter) / visibleItems;
   }
 
+  computeNumToScroll() {
+    // This is to support IE9.
+    // If window.matchMedia does not exist then set the variable to 1.
+    if (!window.matchMedia) {
+      this.numOfItemsToScrollBy = 1;
+      return;
+    }
+    if (window.matchMedia('(min-width: 1300px)').matches) {
+      this.numOfItemsToScrollBy = 4;
+    } else if (window.matchMedia('(min-width: 940px)').matches) {
+      this.numOfItemsToScrollBy = 3;
+    } else if (window.matchMedia('(min-width: 640px)').matches) {
+      this.numOfItemsToScrollBy = 2;
+    } else {
+      this.numOfItemsToScrollBy = 1;
+    }
+  }
+
   handleControlClick(direction, event) {
     event.stopPropagation();
-    const { listElementDimension } = this.state;
-    const scrollSpan = direction === 'previous' ? -listElementDimension : listElementDimension;
+    const scrollSpan = direction === 'previous' ? -this.scrollWidth : this.scrollWidth;
     if (this.props.vertical) {
       this.scroller.scrollBy(0, scrollSpan, true);
     } else {
