@@ -14,7 +14,8 @@ export default class Carousel extends React.Component {
     this.handleNextClick = this.handleControlClick.bind(this, 'next');
     this.makeDebouncedDimensionslUpdateFunction = this.makeDebouncedDimensionslUpdateFunction.bind(this);
     this.computeNumToScroll = this.computeNumToScroll.bind(this);
-    this.forceScroll = this.forceScroll.bind(this);
+    this.forceScrollUp = this.forceScrollUp.bind(this);
+    this.forceScrollDown = this.forceScrollDown.bind(this);
     this.state = {
       listElementDimension: 0,
       listDimension: 0,
@@ -52,15 +53,15 @@ export default class Carousel extends React.Component {
       if (typeof this.props.onScrollerCreated === 'function') {
         this.props.onScrollerCreated(this.scroller);
       }
-      this.scroller.addEventListener('scrollstart', this.forceScroll);
-      this.scroller.addEventListener('scrollend', this.forceScroll);
+      this.scroller.addEventListener('scrollstart', this.forceScrollUp);
+      this.scroller.addEventListener('scrollend', this.forceScrollDown);
       window.addEventListener('resize', this.makeDebouncedDimensionslUpdateFunction);
     });
   }
 
   componentWillUnmount() {
-    this.scroller.removeEventListener('scrollstart', this.forceScroll);
-    this.scroller.removeEventListener('scrollend', this.forceScroll);
+    this.scroller.removeEventListener('scrollstart', this.forceScrollUp);
+    this.scroller.removeEventListener('scrollend', this.forceScrollDown);
     window.removeEventListener('resize', this.debouncedDimensionsUpdateFunction);
   }
 
@@ -97,9 +98,14 @@ export default class Carousel extends React.Component {
       (scrollerElement.offsetWidth + gutter) / visibleItems;
   }
 
-  forceScroll() {
-    if (this.props.onScrollCallback) {
-      this.props.onScrollCallback();
+  forceScrollUp() {
+    if (this.props.onScrollCallbackUp) {
+      this.props.onScrollCallbackUp();
+    }
+  }
+  forceScrollDown() {
+    if (this.props.onScrollCallbackDown) {
+      this.props.onScrollCallbackDown();
     }
   }
 
@@ -129,7 +135,6 @@ export default class Carousel extends React.Component {
     } else {
       this.scroller.scrollBy(scrollSpan, 0, true);
     }
-    this.forceScroll();
     event.preventDefault();
   }
 
@@ -250,6 +255,7 @@ if (process.env.NODE_ENV !== 'production') {
     vertical: React.PropTypes.bool,
     visibleItems: React.PropTypes.number,
     width: React.PropTypes.number,
-    onScrollCallback: React.PropTypes.func,
+    onScrollCallbackUp: React.PropTypes.func,
+    onScrollCallbackDown: React.PropTypes.func,
   };
 }
