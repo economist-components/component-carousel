@@ -27,6 +27,7 @@ describe('Carousel', () => {
           {horizontalNodes}
         </Carousel>
       );
+      rendered.setState({ onStart: false, onEnd: false });
       carousel = rendered.find('.carousel');
     });
 
@@ -60,6 +61,8 @@ describe('Carousel', () => {
     it('displays the correct controls', () => {
       const controlNext = carousel.find('.carousel__control--next');
       const controlPrevious = carousel.find('.carousel__control--previous');
+      controlNext.should.have.style('display', 'block');
+      controlPrevious.should.have.style('display', 'block');
       controlNext.find('span').should.have.text('▶');
       controlPrevious.find('span').should.have.text('◀');
     });
@@ -78,6 +81,15 @@ describe('Carousel', () => {
       spiedHandlePreviousClick.should.have.been.called.exactly(1);
     });
 
+    it('hides previousButton when on start', () => {
+      rendered.setState({ onStart: true });
+      carousel.find('.carousel__control--previous').should.have.style('display', 'none');
+    });
+
+    it('hides nextButton when on end', () => {
+      rendered.setState({ onEnd: true });
+      carousel.find('.carousel__control--next').should.have.style('display', 'none');
+    });
   });
 
   describe('onScrollerCreated callback', () => {
