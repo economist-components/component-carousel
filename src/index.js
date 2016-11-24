@@ -21,8 +21,8 @@ export default class Carousel extends React.Component {
     this.state = {
       listElementDimension: 0,
       listDimension: 0,
-      onStart: true,
-      onEnd: false,
+      isInitialPosition: true,
+      isFinalPosition: false,
     };
     this.numOfItemsToScrollBy = 0;
     this.scrollWidth = 0;
@@ -107,7 +107,7 @@ export default class Carousel extends React.Component {
   }
 
   forceScrollUp() {
-    this.setState({ onStart: false, onEnd: false });
+    this.setState({ isInitialPosition: false, isFinalPosition: false });
     if (this.props.onScrollCallbackUp) {
       this.props.onScrollCallbackUp();
     }
@@ -118,10 +118,10 @@ export default class Carousel extends React.Component {
     }
   }
   reachedStart() {
-    this.setState({ onStart: true });
+    this.setState({ isInitialPosition: true });
   }
   reachedEnd() {
-    this.setState({ onEnd: true });
+    this.setState({ isFinalPosition: true });
   }
 
   computeNumToScroll() {
@@ -179,12 +179,14 @@ export default class Carousel extends React.Component {
         </noscript>
       ) :
       null;
+    const hidePreviousButton = this.props.hideArrowsOnEdges && this.state.isInitialPosition;
+    const hideNextButton = this.props.hideArrowsOnEdges && this.state.isFinalPosition;
     return (
       <div className="carousel">
         {
           previousButton &&
           <CarouselControl
-            style={{ display: this.state.onStart ? 'none' : 'block' }}
+            style={{ display: hidePreviousButton ? 'none' : 'initial' }}
             direction="previous"
             onClick={this.handlePreviousClick}
           >
@@ -203,7 +205,7 @@ export default class Carousel extends React.Component {
         {
           nextButton &&
           <CarouselControl
-            style={{ display: this.state.onEnd ? 'none' : 'block' }}
+            style={{ display: hideNextButton ? 'none' : 'initial' }}
             direction="next"
             onClick={this.handleNextClick}
           >
@@ -230,6 +232,7 @@ if (process.env.NODE_ENV !== 'production') {
     nextButton: React.PropTypes.node,
     previousButton: React.PropTypes.node,
     gutter: React.PropTypes.number,
+    hideArrowsOnEdges: React.PropTypes.bool,
     onScrollerCreated: React.PropTypes.func,
     scrollerOptions: React.PropTypes.shape({
       alwaysScroll: React.PropTypes.bool,

@@ -27,7 +27,7 @@ describe('Carousel', () => {
           {horizontalNodes}
         </Carousel>
       );
-      rendered.setState({ onStart: false, onEnd: false });
+      rendered.setState({ isInitialPosition: false, isFinalPosition: false });
       carousel = rendered.find('.carousel');
     });
 
@@ -61,8 +61,8 @@ describe('Carousel', () => {
     it('displays the correct controls', () => {
       const controlNext = carousel.find('.carousel__control--next');
       const controlPrevious = carousel.find('.carousel__control--previous');
-      controlNext.should.have.style('display', 'block');
-      controlPrevious.should.have.style('display', 'block');
+      controlNext.should.have.style('display', 'initial');
+      controlPrevious.should.have.style('display', 'initial');
       controlNext.find('span').should.have.text('▶');
       controlPrevious.find('span').should.have.text('◀');
     });
@@ -82,12 +82,42 @@ describe('Carousel', () => {
     });
 
     it('hides previousButton when on start', () => {
-      rendered.setState({ onStart: true });
+      rendered.setState({ isInitialPosition: true });
+      carousel.find('.carousel__control--previous').should.have.style('display', 'initial');
+    });
+
+    it('hides nextButton when on end', () => {
+      rendered.setState({ isFinalPosition: true });
+      carousel.find('.carousel__control--next').should.have.style('display', 'initial');
+    });
+  });
+
+  describe('Rendering with hideArrowsOnEdges prop', () => {
+    let rendered = null;
+    let carousel = null;
+    beforeEach(() => {
+      rendered = mount(
+        <Carousel
+          nextButton={<span>▶</span>}
+          previousButton={<span>◀</span>}
+          gutter={10}
+          visibleItems={4}
+          hideArrowsOnEdges
+        >
+          {horizontalNodes}
+        </Carousel>
+      );
+      rendered.setState({ isInitialPosition: false, isFinalPosition: false });
+      carousel = rendered.find('.carousel');
+    });
+
+    it('hides previousButton when on start', () => {
+      rendered.setState({ isInitialPosition: true });
       carousel.find('.carousel__control--previous').should.have.style('display', 'none');
     });
 
     it('hides nextButton when on end', () => {
-      rendered.setState({ onEnd: true });
+      rendered.setState({ isFinalPosition: true });
       carousel.find('.carousel__control--next').should.have.style('display', 'none');
     });
   });
