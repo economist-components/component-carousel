@@ -16,9 +16,13 @@ export default class Carousel extends React.Component {
     this.computeNumToScroll = this.computeNumToScroll.bind(this);
     this.forceScrollUp = this.forceScrollUp.bind(this);
     this.forceScrollDown = this.forceScrollDown.bind(this);
+    this.reachedStart = this.reachedStart.bind(this);
+    this.reachedEnd = this.reachedEnd.bind(this);
     this.state = {
       listElementDimension: 0,
       listDimension: 0,
+      isInitialPosition: true,
+      isFinalPosition: false,
     };
     this.numOfItemsToScrollBy = 0;
     this.scrollWidth = 0;
@@ -55,6 +59,8 @@ export default class Carousel extends React.Component {
       }
       this.scroller.addEventListener('scrollstart', this.forceScrollUp);
       this.scroller.addEventListener('scrollend', this.forceScrollDown);
+      this.scroller.addEventListener('reachedstart', this.reachedStart);
+      this.scroller.addEventListener('reachedend', this.reachedEnd);
       window.addEventListener('resize', this.makeDebouncedDimensionslUpdateFunction);
     });
   }
@@ -62,6 +68,8 @@ export default class Carousel extends React.Component {
   componentWillUnmount() {
     this.scroller.removeEventListener('scrollstart', this.forceScrollUp);
     this.scroller.removeEventListener('scrollend', this.forceScrollDown);
+    this.scroller.removeEventListener('reachedstart', this.reachedStart);
+    this.scroller.removeEventListener('reachedend', this.reachedEnd);
     window.removeEventListener('resize', this.debouncedDimensionsUpdateFunction);
   }
 
@@ -99,6 +107,7 @@ export default class Carousel extends React.Component {
   }
 
   forceScrollUp() {
+    this.setState({ isInitialPosition: false, isFinalPosition: false });
     if (this.props.onScrollCallbackUp) {
       this.props.onScrollCallbackUp();
     }
@@ -107,6 +116,12 @@ export default class Carousel extends React.Component {
     if (this.props.onScrollCallbackDown) {
       this.props.onScrollCallbackDown();
     }
+  }
+  reachedStart() {
+    this.setState({ isInitialPosition: true });
+  }
+  reachedEnd() {
+    this.setState({ isFinalPosition: true });
   }
 
   computeNumToScroll() {
@@ -164,11 +179,14 @@ export default class Carousel extends React.Component {
         </noscript>
       ) :
       null;
+    const hidePreviousButton = this.props.hideArrowsOnEdges && this.state.isInitialPosition;
+    const hideNextButton = this.props.hideArrowsOnEdges && this.state.isFinalPosition;
     return (
       <div className="carousel">
         {
           previousButton &&
           <CarouselControl
+            style={{ display: hidePreviousButton ? 'none' : 'initial' }}
             direction="previous"
             onClick={this.handlePreviousClick}
           >
@@ -187,6 +205,7 @@ export default class Carousel extends React.Component {
         {
           nextButton &&
           <CarouselControl
+            style={{ display: hideNextButton ? 'none' : 'initial' }}
             direction="next"
             onClick={this.handleNextClick}
           >
@@ -213,6 +232,7 @@ if (process.env.NODE_ENV !== 'production') {
     nextButton: React.PropTypes.node,
     previousButton: React.PropTypes.node,
     gutter: React.PropTypes.number,
+    hideArrowsOnEdges: React.PropTypes.bool,
     onScrollerCreated: React.PropTypes.func,
     scrollerOptions: React.PropTypes.shape({
       alwaysScroll: React.PropTypes.bool,
