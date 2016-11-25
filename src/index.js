@@ -186,7 +186,7 @@ export default class Carousel extends React.Component {
         {
           previousButton &&
           <CarouselControl
-            style={{ display: hidePreviousButton ? 'none' : 'initial' }}
+            style={{ display: hidePreviousButton ? 'none' : '' }}
             direction="previous"
             onClick={this.handlePreviousClick}
           >
@@ -205,7 +205,7 @@ export default class Carousel extends React.Component {
         {
           nextButton &&
           <CarouselControl
-            style={{ display: hideNextButton ? 'none' : 'initial' }}
+            style={{ display: hideNextButton ? 'none' : '' }}
             direction="next"
             onClick={this.handleNextClick}
           >

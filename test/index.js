@@ -61,8 +61,8 @@ describe('Carousel', () => {
     it('displays the correct controls', () => {
       const controlNext = carousel.find('.carousel__control--next');
       const controlPrevious = carousel.find('.carousel__control--previous');
-      controlNext.should.have.style('display', 'initial');
-      controlPrevious.should.have.style('display', 'initial');
+      controlNext.should.not.have.style('display');
+      controlPrevious.should.not.have.style('display');
       controlNext.find('span').should.have.text('▶');
       controlPrevious.find('span').should.have.text('◀');
     });
@@ -83,12 +83,12 @@ describe('Carousel', () => {
 
     it('hides previousButton when on start', () => {
       rendered.setState({ isInitialPosition: true });
-      carousel.find('.carousel__control--previous').should.have.style('display', 'initial');
+      carousel.find('.carousel__control--previous').should.not.have.style('display');
     });
 
     it('hides nextButton when on end', () => {
       rendered.setState({ isFinalPosition: true });
-      carousel.find('.carousel__control--next').should.have.style('display', 'initial');
+      carousel.find('.carousel__control--next').should.not.have.style('display');
     });
   });
 
