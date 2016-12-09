@@ -57,6 +57,9 @@ export default class Carousel extends React.Component {
       if (typeof this.props.onScrollerCreated === 'function') {
         this.props.onScrollerCreated(this.scroller);
       }
+      if (typeof this.props.onScrollerSegmentdidchange === 'function') {
+        this.scroller.addEventListener('segmentdidchange', this.props.onScrollerSegmentdidchange, this.scroller);
+      }
       this.scroller.addEventListener('scrollstart', this.forceScrollUp);
       this.scroller.addEventListener('scrollend', this.forceScrollDown);
       this.scroller.addEventListener('reachedstart', this.reachedStart);
@@ -66,6 +69,9 @@ export default class Carousel extends React.Component {
   }
 
   componentWillUnmount() {
+    if (typeof this.props.onScrollerSegmentdidchange === 'function') {
+      this.scroller.removeEventListener('segmentdidchange', this.props.onScrollerSegmentdidchange);
+    }
     this.scroller.removeEventListener('scrollstart', this.forceScrollUp);
     this.scroller.removeEventListener('scrollend', this.forceScrollDown);
     this.scroller.removeEventListener('reachedstart', this.reachedStart);
@@ -234,6 +240,7 @@ if (process.env.NODE_ENV !== 'production') {
     gutter: React.PropTypes.number,
     hideArrowsOnEdges: React.PropTypes.bool,
     onScrollerCreated: React.PropTypes.func,
+    onScrollerSegmentdidchange: React.PropTypes.func,
     scrollerOptions: React.PropTypes.shape({
       alwaysScroll: React.PropTypes.bool,
       baseAlignments: React.PropTypes.shape({
