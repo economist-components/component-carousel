@@ -6,7 +6,7 @@ export default function CarouselCounter({ currentSegment, totalSegment, separato
     <div className={`${ classNamePrefix }__counter`}>
       <span className={`${ classNamePrefix }__counter-current-segment`}>{currentSegment}</span>
       {separator}
-      <span className={`${ classNamePrefix }__counter-current-segment`}>{totalSegment}</span>
+      <span className={`${ classNamePrefix }__counter-total-segment`}>{totalSegment}</span>
     </div>
   );
 }
