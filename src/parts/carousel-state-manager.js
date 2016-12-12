@@ -2,6 +2,7 @@ import React from 'react';
 import Carousel from '../index';
 import CarouselCounter from './carousel-counter';
 import CarouselCaptionDisplay from './carousel-caption-display';
+import CarouselCreditDisplay from './carousel-credit-display';
 
 export default class CarouselStateManager extends React.Component {
   constructor(props) {
@@ -13,17 +14,23 @@ export default class CarouselStateManager extends React.Component {
     const segments = this.props.children.filter((child) => child.type === Carousel)[0].props.children;
     this.totalSegment = segments.length;
     this.captions = segments.map((segment) => segment.props['data-caption']);
+    this.credits = segments.map((segment) => segment.props['data-credit']);
     this.setState({
       caption: this.retrieveCaption(0),
+      credit: this.retrieveCredit(0),
     })
   }
   retrieveCaption(index) {
     return (this.captions.length > 0) ? this.captions[index] : '';
   }
+  retrieveCredit(index) {
+    return (this.credits.length > 0) ? this.credits[index] : '';
+  }
   handleSegmentChange({ segmentX, segmentY, srcObject }) {
     this.setState({
       currentSegment: segmentX + 1,
       caption: this.retrieveCaption(segmentX),
+      credit: this.retrieveCredit(segmentX),
     });
   }
   render() {
@@ -46,6 +53,14 @@ export default class CarouselStateManager extends React.Component {
           {
             caption: this.state.caption,
             key: 'carousel-caption-display',
+          }
+        ));
+      } else if (child.type === CarouselCreditDisplay) {
+        newChild = React.cloneElement(child, Object.assign(
+          {},
+          {
+            credit: this.state.credit,
+            key: 'carousel-credit-display',
           }
         ));
       } else if (child.type === Carousel) {
