@@ -24,7 +24,7 @@ export default class Carousel extends React.Component {
       isInitialPosition: true,
       isFinalPosition: false,
     };
-    this.numOfItemsToScrollBy = 0;
+    this.numOfItemsToScrollBy = 1;
     this.scrollWidth = 0;
   }
 
@@ -45,6 +45,7 @@ export default class Carousel extends React.Component {
         gutter,
         this.props.vertical
       );
+      this.scrollWidth = listElementDimension * this.numOfItemsToScrollBy;
     }
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       listElementDimension,
@@ -57,6 +58,9 @@ export default class Carousel extends React.Component {
       if (typeof this.props.onScrollerCreated === 'function') {
         this.props.onScrollerCreated(this.scroller);
       }
+      if (typeof this.props.onScrollerSegmentdidchange === 'function') {
+        this.scroller.addEventListener('segmentdidchange', this.props.onScrollerSegmentdidchange, this.scroller);
+      }
       this.scroller.addEventListener('scrollstart', this.forceScrollUp);
       this.scroller.addEventListener('scrollend', this.forceScrollDown);
       this.scroller.addEventListener('reachedstart', this.reachedStart);
@@ -66,6 +70,9 @@ export default class Carousel extends React.Component {
   }
 
   componentWillUnmount() {
+    if (typeof this.props.onScrollerSegmentdidchange === 'function') {
+      this.scroller.removeEventListener('segmentdidchange', this.props.onScrollerSegmentdidchange);
+    }
     this.scroller.removeEventListener('scrollstart', this.forceScrollUp);
     this.scroller.removeEventListener('scrollend', this.forceScrollDown);
     this.scroller.removeEventListener('reachedstart', this.reachedStart);
@@ -91,9 +98,10 @@ export default class Carousel extends React.Component {
           listElementDimension: newListElementDimension,
           listDimension: newListDimension,
         });
+        this.scrollWidth = this.props.width ? this.props.width * this.numOfItemsToScrollBy :
+          newListElementDimension * this.numOfItemsToScrollBy;
       }
     }, this.debounceWait);
-    this.scrollWidth = this.props.width * this.numOfItemsToScrollBy;
     return this.debouncedDimensionsUpdateFunction;
   }
 
@@ -125,20 +133,22 @@ export default class Carousel extends React.Component {
   }
 
   computeNumToScroll() {
-    // This is to support IE9.
-    // If window.matchMedia does not exist then set the variable to 1.
-    if (!window.matchMedia) {
-      this.numOfItemsToScrollBy = 1;
-      return;
-    }
-    if (window.matchMedia('(min-width: 1300px)').matches) {
-      this.numOfItemsToScrollBy = 4;
-    } else if (window.matchMedia('(min-width: 940px)').matches) {
-      this.numOfItemsToScrollBy = 3;
-    } else if (window.matchMedia('(min-width: 640px)').matches) {
-      this.numOfItemsToScrollBy = 2;
-    } else {
-      this.numOfItemsToScrollBy = 1;
+    if (this.props.computeScrollNumber) {
+      // This is to support IE9.
+      // If window.matchMedia does not exist then set the variable to 1.
+      if (!window.matchMedia) {
+        this.numOfItemsToScrollBy = 1;
+        return;
+      }
+      if (window.matchMedia('(min-width: 1300px)').matches) {
+        this.numOfItemsToScrollBy = 4;
+      } else if (window.matchMedia('(min-width: 940px)').matches) {
+        this.numOfItemsToScrollBy = 3;
+      } else if (window.matchMedia('(min-width: 640px)').matches) {
+        this.numOfItemsToScrollBy = 2;
+      } else {
+        this.numOfItemsToScrollBy = 1;
+      }
     }
   }
 
@@ -219,6 +229,7 @@ export default class Carousel extends React.Component {
 }
 
 Carousel.defaultProps = {
+  computeScrollNumber: true,
   scrollerOptions: {
     scrollbars: false,
     updateOnWindowResize: true,
@@ -229,11 +240,13 @@ Carousel.defaultProps = {
 if (process.env.NODE_ENV !== 'production') {
   Carousel.propTypes = {
     children: React.PropTypes.arrayOf(React.PropTypes.node),
+    computeScrollNumber: React.PropTypes.bool,
     nextButton: React.PropTypes.node,
     previousButton: React.PropTypes.node,
     gutter: React.PropTypes.number,
     hideArrowsOnEdges: React.PropTypes.bool,
     onScrollerCreated: React.PropTypes.func,
+    onScrollerSegmentdidchange: React.PropTypes.func,
     scrollerOptions: React.PropTypes.shape({
       alwaysScroll: React.PropTypes.bool,
       baseAlignments: React.PropTypes.shape({
