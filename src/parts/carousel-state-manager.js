@@ -18,7 +18,7 @@ export default class CarouselStateManager extends React.Component {
     this.setState({
       caption: this.retrieveCaption(0),
       credit: this.retrieveCredit(0),
-    })
+    });
   }
   retrieveCaption(index) {
     return (this.captions.length > 0) ? this.captions[index] : '';
@@ -26,7 +26,7 @@ export default class CarouselStateManager extends React.Component {
   retrieveCredit(index) {
     return (this.credits.length > 0) ? this.credits[index] : '';
   }
-  handleSegmentChange({ segmentX, segmentY, srcObject }) {
+  handleSegmentChange({ segmentX }) {
     this.setState({
       currentSegment: segmentX + 1,
       caption: this.retrieveCaption(segmentX),
@@ -69,11 +69,6 @@ export default class CarouselStateManager extends React.Component {
           child.props,
           {
             onScrollerSegmentdidchange: this.handleSegmentChange,
-            scrollerOptions: {
-              snapping: true,
-              singlePageScrolls: true,
-              scrollingY: false,
-            },
             key: 'Carousel',
           }
         ));
