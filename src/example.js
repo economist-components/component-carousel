@@ -9,7 +9,7 @@ import CarouselCreditDisplay from './parts/carousel-credit-display';
 export const horizontalNodes = ([
   <div className="example-node"
     key="0"
-    data-caption="This i the caption 1"
+    data-caption="This is the caption 1"
     data-credit="Credit for 1"
   >
     <div className="example-node__image" />
@@ -18,7 +18,7 @@ export const horizontalNodes = ([
   </div>,
   <div className="example-node"
     key="1"
-    data-caption="This i the caption 2"
+    data-caption="This is the caption 2"
     data-credit="Credit for 2"
   >
     <div className="example-node__image" />
@@ -27,7 +27,7 @@ export const horizontalNodes = ([
   </div>,
   <div className="example-node"
     key="2"
-    data-caption="This i the caption 3"
+    data-caption="This is the caption 3"
     data-credit="Credit for 3"
   >
     <div className="example-node__image" />
@@ -38,7 +38,7 @@ export const horizontalNodes = ([
   </div>,
   <div className="example-node"
     key="3"
-    data-caption="This i the caption 4"
+    data-caption="This is the caption 4"
     data-credit="Credit for 4"
   >
     <div className="example-node__image" />
@@ -49,7 +49,7 @@ export const horizontalNodes = ([
   </div>,
   <div className="example-node"
     key="4"
-    data-caption="This i the caption 5"
+    data-caption="This is the caption 5"
     data-credit="Credit for 5"
   >
     <div className="example-node__image" />
