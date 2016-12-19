@@ -65,7 +65,7 @@ export default class Carousel extends React.Component {
       this.scroller.addEventListener('scrollend', this.forceScrollDown);
       this.scroller.addEventListener('reachedstart', this.reachedStart);
       this.scroller.addEventListener('reachedend', this.reachedEnd);
-      window.addEventListener('resize', this.makeDebouncedDimensionslUpdateFunction);
+      window.addEventListener('resize', this.makeDebouncedDimensionslUpdateFunction());
     });
   }
 
