@@ -55,7 +55,7 @@ describe('Carousel', () => {
 
     it('computes the correct dimensions', () => {
       const carouselInstance = new Carousel();
-      carouselInstance.computeDimensions({ offsetWidth: 90 }, 4, 10, false).should.equal(22.5);
+      carouselInstance.computeDimensions({ offsetWidth: 90 }, 4, 10, false).should.equal(25);
     });
 
     it('displays the correct controls', () => {

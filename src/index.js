@@ -109,8 +109,8 @@ export default class Carousel extends React.Component {
       return null;
     }
     return vertical ?
-      scrollerElement.offsetHeight / visibleItems :
-      scrollerElement.offsetWidth / visibleItems;
+      (scrollerElement.offsetHeight + gutter) / visibleItems :
+      (scrollerElement.offsetWidth + gutter) / visibleItems;
   }
 
   forceScrollUp() {
