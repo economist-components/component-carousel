@@ -84,22 +84,21 @@ export default class Carousel extends React.Component {
     this.computeNumToScroll();
     this.debouncedDimensionsUpdateFunction = debounce(() => {
       const { scroller: scrollerElement } = this.refs;
-      const { children, gutter, vertical, visibleItems } = this.props;
+      const { children, gutter, vertical, visibleItems, width } = this.props;
       const newListElementDimension = this.computeDimensions(
         scrollerElement,
         visibleItems,
         gutter,
         vertical
       );
-      if (newListElementDimension) {
+      if (newListElementDimension && !width) {
         const newListDimension = newListElementDimension * children.length;
         this.scroller.updateDimensions(newListDimension - gutter, scrollerElement.offsetHeight);
         this.setState({
           listElementDimension: newListElementDimension,
           listDimension: newListDimension,
         });
-        this.scrollWidth = this.props.width ? this.props.width * this.numOfItemsToScrollBy :
-          newListElementDimension * this.numOfItemsToScrollBy;
+        this.scrollWidth = newListElementDimension * this.numOfItemsToScrollBy;
       }
     }, this.debounceWait);
     return this.debouncedDimensionsUpdateFunction;
