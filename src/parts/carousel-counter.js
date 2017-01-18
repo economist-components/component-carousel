@@ -5,9 +5,10 @@ export default function CarouselCounter({
   totalSegment,
   separator = ' of ',
   classNamePrefix = 'carousel',
+  style = null,
 }) {
   return (
-    <div className={`${ classNamePrefix }__counter`}>
+    <div className={`${ classNamePrefix }__counter`} style={style}>
       <span className={`${ classNamePrefix }__counter-current-segment`}>{currentSegment}</span>
       {separator}
       <span className={`${ classNamePrefix }__counter-total-segment`}>{totalSegment}</span>
@@ -24,5 +25,6 @@ if (process.env.NODE_ENV !== 'production') {
       React.PropTypes.node,
     ]),
     classNamePrefix: React.PropTypes.string,
+    style: React.PropTypes.objectOf(React.PropTypes.string),
   };
 }
