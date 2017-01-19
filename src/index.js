@@ -53,7 +53,12 @@ export default class Carousel extends React.Component {
     }, () => {
       this.scroller = new Scroller(
         scrollerElement,
-        Object.assign({}, scrollerOptions, { scrollingY: vertical, scrollingX: !vertical })
+        Object.assign({}, {
+          scrollingY: vertical,
+          scrollingX: !vertical,
+          scrollBoundary: 70,
+          scrollResponseBoundary: 70,
+        }, scrollerOptions)
       );
       if (typeof this.props.onScrollerCreated === 'function') {
         this.props.onScrollerCreated(this.scroller);
