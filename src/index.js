@@ -33,7 +33,15 @@ export default class Carousel extends React.Component {
     // ftscroller must be required only on the client, as it accesses window.document on require
     const Scroller = require('ftscroller').FTScroller; // eslint-disable-line global-require
     const { scroller: scrollerElement } = this.refs;
-    const { children, gutter, scrollerOptions, vertical, visibleItems, width } = this.props;
+    const {
+      children,
+      gutter,
+      scrollerOptions,
+      vertical,
+      visibleItems,
+      width,
+      enablePassThrough = !vertical,
+    } = this.props;
     let listElementDimension = 0;
     if (width) {
       listElementDimension = width;
@@ -47,18 +55,18 @@ export default class Carousel extends React.Component {
       );
       this.scrollWidth = listElementDimension * this.numOfItemsToScrollBy;
     }
+    const scrollingOptions = { scrollingY: vertical, scrollingX: !vertical };
+    const passThroughOptions = enablePassThrough ? {
+      scrollBoundary: 65,
+      scrollResponseBoundary: 65,
+    } : null;
     this.setState({ // eslint-disable-line react/no-did-mount-set-state
       listElementDimension,
       listDimension: listElementDimension * children.length,
     }, () => {
       this.scroller = new Scroller(
         scrollerElement,
-        Object.assign({}, {
-          scrollingY: vertical,
-          scrollingX: !vertical,
-          scrollBoundary: 70,
-          scrollResponseBoundary: 70,
-        }, scrollerOptions)
+        Object.assign({}, scrollingOptions, passThroughOptions, scrollerOptions)
       );
       if (typeof this.props.onScrollerCreated === 'function') {
         this.props.onScrollerCreated(this.scroller);
@@ -245,6 +253,7 @@ if (process.env.NODE_ENV !== 'production') {
   Carousel.propTypes = {
     children: React.PropTypes.arrayOf(React.PropTypes.node),
     computeScrollNumber: React.PropTypes.bool,
+    enablePassThrough: React.PropTypes.bool,
     nextButton: React.PropTypes.node,
     previousButton: React.PropTypes.node,
     gutter: React.PropTypes.number,
