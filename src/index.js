@@ -175,6 +175,19 @@ export default class Carousel extends React.Component {
     event.preventDefault();
   }
 
+  createKeyDownHandle(clickHandle) {
+    return function handleKeyDown(evt) {
+      switch (evt.keyCode) {
+        case 13: // eslint-disable-line no-magic-numbers
+        case 32: { // eslint-disable-line no-magic-numbers
+          clickHandle(evt);
+          break;
+        }
+        default:
+      }
+    };
+  }
+
   render() {
     const { children, gutter, nextButton, previousButton, vertical } = this.props;
     const styles = '.carousel__control { display: none !important } .carousel__list { overflow-x: scroll; }';
@@ -211,6 +224,7 @@ export default class Carousel extends React.Component {
             style={{ display: hidePreviousButton ? 'none' : '' }}
             direction="previous"
             onClick={this.handlePreviousClick}
+            onKeyDown={this.createKeyDownHandle(this.handlePreviousClick)}
           >
             {previousButton}
           </CarouselControl>
@@ -230,6 +244,7 @@ export default class Carousel extends React.Component {
             style={{ display: hideNextButton ? 'none' : '' }}
             direction="next"
             onClick={this.handleNextClick}
+            onKeyDown={this.createKeyDownHandle(this.handleNextClick)}
           >
             {nextButton}
           </CarouselControl>
