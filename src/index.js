@@ -55,7 +55,7 @@ export default class Carousel extends React.Component {
       );
       this.scrollWidth = listElementDimension * this.numOfItemsToScrollBy;
     }
-    const scrollingOptions = { scrollingY: vertical, scrollingX: !vertical };
+    const scrollingDirection = { scrollingY: vertical, scrollingX: !vertical };
     const passThroughOptions = enablePassThrough ? {
       scrollBoundary: 65,
       scrollResponseBoundary: 65,
@@ -66,7 +66,7 @@ export default class Carousel extends React.Component {
     }, () => {
       this.scroller = new Scroller(
         scrollerElement,
-        Object.assign({}, scrollingOptions, passThroughOptions, scrollerOptions)
+        Object.assign({}, scrollingDirection, passThroughOptions, scrollerOptions)
       );
       if (typeof this.props.onScrollerCreated === 'function') {
         this.props.onScrollerCreated(this.scroller);
@@ -175,12 +175,12 @@ export default class Carousel extends React.Component {
     event.preventDefault();
   }
 
-  createKeyDownHandle(clickHandle) {
-    return function handleKeyDown(evt) {
-      switch (evt.keyCode) {
+  createKeyDownHandler(clickHandle) {
+    return function handleKeyDown(event) {
+      switch (event.keyCode) {
         case 13: // eslint-disable-line no-magic-numbers
         case 32: { // eslint-disable-line no-magic-numbers
-          clickHandle(evt);
+          clickHandle(event);
           break;
         }
         default:
@@ -224,7 +224,7 @@ export default class Carousel extends React.Component {
             style={{ display: hidePreviousButton ? 'none' : '' }}
             direction="previous"
             onClick={this.handlePreviousClick}
-            onKeyDown={this.createKeyDownHandle(this.handlePreviousClick)}
+            onKeyDown={this.createKeyDownHandler(this.handlePreviousClick)}
           >
             {previousButton}
           </CarouselControl>
@@ -244,7 +244,7 @@ export default class Carousel extends React.Component {
             style={{ display: hideNextButton ? 'none' : '' }}
             direction="next"
             onClick={this.handleNextClick}
-            onKeyDown={this.createKeyDownHandle(this.handleNextClick)}
+            onKeyDown={this.createKeyDownHandler(this.handleNextClick)}
           >
             {nextButton}
           </CarouselControl>
