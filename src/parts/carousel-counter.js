@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default function CarouselCounter({
   currentSegment,
@@ -17,12 +18,12 @@ export default function CarouselCounter({
 
 if (process.env.NODE_ENV !== 'production') {
   CarouselCounter.propTypes = {
-    currentSegment: React.PropTypes.number,
-    totalSegment: React.PropTypes.number,
-    separator: React.PropTypes.oneOfType([
-      React.PropTypes.string,
-      React.PropTypes.node,
+    currentSegment: PropTypes.number,
+    totalSegment: PropTypes.number,
+    separator: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.node,
     ]),
-    classNamePrefix: React.PropTypes.string,
+    classNamePrefix: PropTypes.string,
   };
 }

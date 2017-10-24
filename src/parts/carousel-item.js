@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default function CarouselItem({ children, dimension, gutter, vertical }) {
   const size = dimension ? `${ dimension }px` : null;
@@ -22,9 +23,9 @@ export default function CarouselItem({ children, dimension, gutter, vertical }) 
 
 if (process.env.NODE_ENV !== 'production') {
   CarouselItem.propTypes = {
-    dimension: React.PropTypes.number,
-    gutter: React.PropTypes.number,
-    children: React.PropTypes.node,
-    vertical: React.PropTypes.bool,
+    dimension: PropTypes.number,
+    gutter: PropTypes.number,
+    children: PropTypes.node,
+    vertical: PropTypes.bool,
   };
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default function CarouselControl({ children, style, direction, onClick, onKeyDown }) {
   return (
@@ -17,12 +18,12 @@ export default function CarouselControl({ children, style, direction, onClick, o
 
 if (process.env.NODE_ENV !== 'production') {
   CarouselControl.propTypes = {
-    children: React.PropTypes.node,
-    style: React.PropTypes.shape({
-      display: React.PropTypes.string,
+    children: PropTypes.node,
+    style: PropTypes.shape({
+      display: PropTypes.string,
     }),
-    onClick: React.PropTypes.func.isRequired,
-    onKeyDown: React.PropTypes.func,
-    direction: React.PropTypes.oneOf([ 'previous', 'next' ]),
+    onClick: PropTypes.func.isRequired,
+    onKeyDown: PropTypes.func,
+    direction: PropTypes.oneOf([ 'previous', 'next' ]),
   };
 }

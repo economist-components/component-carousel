@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Carousel from '../index';
 import CarouselCounter from './carousel-counter';
 import CarouselCaptionDisplay from './carousel-caption-display';
@@ -88,6 +89,6 @@ export default class CarouselStateManager extends React.Component {
 
 if (process.env.NODE_ENV !== 'production') {
   CarouselStateManager.propTypes = {
-    children: React.PropTypes.node,
+    children: PropTypes.node,
   };
 }
