@@ -2,10 +2,13 @@ import 'babel-polyfill';
 import Carousel from '../src';
 import { horizontalNodes } from '../src/example';
 import React from 'react';
+import Enzyme from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
 import chai from 'chai';
 import chaiEnzyme from 'chai-enzyme';
 import spies from 'chai-spies';
 import { mount } from 'enzyme';
+Enzyme.configure({ adapter: new Adapter() });
 chai.use(chaiEnzyme()).use(spies).should();
 describe('Carousel', () => {
 
@@ -137,7 +140,7 @@ describe('Carousel', () => {
         </Carousel>
       );
       spiedOnScrollerCreated.should.have.been.called.exactly(1);
-      spiedOnScrollerCreated.should.have.been.called.with(rendered.get(0).scroller);
+      spiedOnScrollerCreated.should.have.been.called.with(rendered.instance().scroller);
     });
   });
 });

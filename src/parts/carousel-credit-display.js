@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default function CarouselCreditDisplay({
   classNamePrefix = 'carousel',
@@ -14,8 +15,8 @@ export default function CarouselCreditDisplay({
 
 if (process.env.NODE_ENV !== 'production') {
   CarouselCreditDisplay.propTypes = {
-    classNamePrefix: React.PropTypes.string,
-    credit: React.PropTypes.string,
-    hideEmpty: React.PropTypes.bool,
+    classNamePrefix: PropTypes.string,
+    credit: PropTypes.string,
+    hideEmpty: PropTypes.bool,
   };
 }

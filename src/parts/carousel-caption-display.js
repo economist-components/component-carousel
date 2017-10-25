@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default function CarouselCaptionDisplay({ classNamePrefix = 'carousel', caption = '' }) {
   return (<span className={`${ classNamePrefix }__caption`}>{caption}</span>);
@@ -6,7 +7,7 @@ export default function CarouselCaptionDisplay({ classNamePrefix = 'carousel', c
 
 if (process.env.NODE_ENV !== 'production') {
   CarouselCaptionDisplay.propTypes = {
-    classNamePrefix: React.PropTypes.string,
-    caption: React.PropTypes.string,
+    classNamePrefix: PropTypes.string,
+    caption: PropTypes.string,
   };
 }
