@@ -27,13 +27,15 @@ export default class Carousel extends React.Component {
     };
     this.numOfItemsToScrollBy = 1;
     this.scrollWidth = 0;
+    this.scroller = null;
+    this.scrollerRef = null;
   }
 
   componentDidMount() {
     this.computeNumToScroll();
     // ftscroller must be required only on the client, as it accesses window.document on require
     const Scroller = require('ftscroller').FTScroller; // eslint-disable-line global-require
-    const { scroller: scrollerElement } = this.refs;
+    const scrollerElement = this.scrollerRef;
     const {
       children,
       gutter,
@@ -84,20 +86,22 @@ export default class Carousel extends React.Component {
   }
 
   componentWillUnmount() {
-    if (typeof this.props.onScrollerSegmentdidchange === 'function') {
-      this.scroller.removeEventListener('segmentdidchange', this.props.onScrollerSegmentdidchange);
+    if (this.scroller) {
+      if (typeof this.props.onScrollerSegmentdidchange === 'function') {
+        this.scroller.removeEventListener('segmentdidchange', this.props.onScrollerSegmentdidchange);
+      }
+      this.scroller.removeEventListener('scrollstart', this.forceScrollUp);
+      this.scroller.removeEventListener('scrollend', this.forceScrollDown);
+      this.scroller.removeEventListener('reachedstart', this.reachedStart);
+      this.scroller.removeEventListener('reachedend', this.reachedEnd);
+      window.removeEventListener('resize', this.debouncedDimensionsUpdateFunction);
     }
-    this.scroller.removeEventListener('scrollstart', this.forceScrollUp);
-    this.scroller.removeEventListener('scrollend', this.forceScrollDown);
-    this.scroller.removeEventListener('reachedstart', this.reachedStart);
-    this.scroller.removeEventListener('reachedend', this.reachedEnd);
-    window.removeEventListener('resize', this.debouncedDimensionsUpdateFunction);
   }
 
   makeDebouncedDimensionslUpdateFunction() {
     this.computeNumToScroll();
     this.debouncedDimensionsUpdateFunction = debounce(() => {
-      const { scroller: scrollerElement } = this.refs;
+      const scrollerElement = this.scrollerRef;
       const { children, gutter, vertical, visibleItems, width } = this.props;
       const newListElementDimension = this.computeDimensions(
         scrollerElement,
@@ -119,9 +123,6 @@ export default class Carousel extends React.Component {
   }
 
   computeDimensions(scrollerElement, visibleItems, gutter, vertical) {
-    if (scrollerElement.offsetHeight === 0 || scrollerElement.offsetWidth === 0) {
-      return null;
-    }
     return vertical ?
       (scrollerElement.offsetHeight + gutter) / visibleItems :
       (scrollerElement.offsetWidth + gutter) / visibleItems;
@@ -230,7 +231,8 @@ export default class Carousel extends React.Component {
             {previousButton}
           </CarouselControl>
         }
-        <div className="carousel__wrapper" ref="scroller">
+        {/* eslint-disable react/jsx-no-bind, brace-style  */}
+        <div className="carousel__wrapper" ref={(ref) => { this.scrollerRef = ref; }}>
           <CarouselList
             dimension={this.state.listDimension}
             gutter={gutter}
@@ -239,6 +241,7 @@ export default class Carousel extends React.Component {
             {carouselItems}
           </CarouselList>
         </div>
+         {/* eslint-enable react/jsx-no-bind, brace-style  */}
         {
           nextButton &&
           <CarouselControl
