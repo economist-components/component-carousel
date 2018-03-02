@@ -192,7 +192,6 @@ export default class Carousel extends React.Component {
 
   render() {
     const { children, gutter, nextButton, previousButton, vertical } = this.props;
-    const styles = '.carousel__control { display: none !important } .carousel__list { overflow-x: scroll; }';
     const carouselItems = children.map(
       (child, index) =>
         <CarouselItem
@@ -204,20 +203,11 @@ export default class Carousel extends React.Component {
           {child}
         </CarouselItem>
     );
-    // Rendering noscript tag from server because of the issue in the link below.
-    // https://github.com/facebook/react/issues/7607
-    // The noscript tag causes react to fail and so have to render on the server.
-    const noScript = typeof window === 'undefined' ?
-      (
-        <noscript>
-          {/* eslint-disable react/no-danger  */}
-          <style dangerouslySetInnerHTML={{ __html: styles }} />
-          {/* eslint-enable react/no-danger  */}
-        </noscript>
-      ) :
-      null;
-    const hidePreviousButton = this.props.hideArrowsOnEdges && this.state.isInitialPosition;
-    const hideNextButton = this.props.hideArrowsOnEdges && this.state.isFinalPosition;
+    // listStyle and hasControlsEnabled are used to distinguish between client and server side rendering.
+    const listStyle = typeof window === 'undefined' && !vertical ? { overflowX: 'scroll' } : null;
+    const hasControlsEnabled = typeof window === 'object';
+    const hidePreviousButton = hasControlsEnabled && this.props.hideArrowsOnEdges && this.state.isInitialPosition;
+    const hideNextButton = hasControlsEnabled && this.props.hideArrowsOnEdges && this.state.isFinalPosition;
     return (
       <div className="carousel">
         {
@@ -237,6 +227,7 @@ export default class Carousel extends React.Component {
             dimension={this.state.listDimension}
             gutter={gutter}
             vertical={vertical}
+            style={listStyle}
           >
             {carouselItems}
           </CarouselList>
@@ -253,7 +244,6 @@ export default class Carousel extends React.Component {
             {nextButton}
           </CarouselControl>
         }
-        {noScript}
       </div>
     );
   }

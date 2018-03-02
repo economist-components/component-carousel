@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export default function CarouselList({ children, dimension, gutter, vertical }) {
+export default function CarouselList({ children, dimension, gutter, vertical, style: styleProp }) {
   const size = dimension ? `${ dimension }px` : null;
-  const style = {};
+  let style = {};
   if (vertical) {
     style.height = size;
     style.marginTop = `${ -gutter / 2 }px`;
@@ -13,6 +13,8 @@ export default function CarouselList({ children, dimension, gutter, vertical }) 
     style.marginLeft = `${ -gutter / 2 }px`;
     style.marginRight = `${ -gutter / 2 }px`;
   }
+  style = Object.assign(style, styleProp);
+
   return (
     <ul className={`carousel__list${ vertical ? ' --vertical' : '' }`} style={style}>
       {children}
@@ -26,5 +28,6 @@ if (process.env.NODE_ENV !== 'production') {
     dimension: PropTypes.number,
     gutter: PropTypes.number,
     vertical: PropTypes.bool,
+    style: PropTypes.shape({}),
   };
 }
