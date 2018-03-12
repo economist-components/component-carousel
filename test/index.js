@@ -56,11 +56,6 @@ describe('Carousel', () => {
       carouselList.should.have.style('marginRight', '-5px');
     });
 
-    it('computes the correct dimensions', () => {
-      const carouselInstance = new Carousel();
-      carouselInstance.computeDimensions({ offsetWidth: 90 }, 4, 10, false).should.equal(25);
-    });
-
     it('displays the correct controls', () => {
       const controlNext = carousel.find('.carousel__control--next');
       const controlPrevious = carousel.find('.carousel__control--previous');
@@ -122,25 +117,6 @@ describe('Carousel', () => {
     it('hides nextButton when on end', () => {
       rendered.setState({ isFinalPosition: true });
       carousel.find('.carousel__control--next').should.have.style('display', 'none');
-    });
-  });
-
-  describe('onScrollerCreated callback', () => {
-    it('calls the callback when the scroller is created', () => {
-      const spiedOnScrollerCreated = chai.spy((scroller) => scroller);
-      const rendered = mount(
-        <Carousel
-          onScrollerCreated={spiedOnScrollerCreated}
-          nextButton={<span>▶</span>}
-          previousButton={<span>◀</span>}
-          gutter={10}
-          visibleItems={4}
-        >
-          {horizontalNodes}
-        </Carousel>
-      );
-      spiedOnScrollerCreated.should.have.been.called.exactly(1);
-      spiedOnScrollerCreated.should.have.been.called.with(rendered.instance().scroller);
     });
   });
 });
