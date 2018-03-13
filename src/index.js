@@ -151,6 +151,7 @@ export default class Carousel extends React.Component {
           <CarouselScroller
             onConstructed={this.handleScrollerCreated}
             isVertical={this.props.vertical}
+            isAnimated={this.props.animated}
             listSize={this.state.listDimension}
             scrollSize={this.state.scrollSize}
             scrollDeadSize={64}
@@ -195,7 +196,10 @@ Carousel.defaultProps = {
   computeScrollNumber: true,
   scrollDeadSize: 65,
   visibleItems: 4,
+  animated: true,
   onSegmentChange: noop,
+  onScrollStart: noop,
+  onScrollEnd: noop,
 };
 
 if (process.env.NODE_ENV !== 'production') {
@@ -208,6 +212,7 @@ if (process.env.NODE_ENV !== 'production') {
     gutter: PropTypes.number,
     hideArrowsOnEdges: PropTypes.bool,
     vertical: PropTypes.bool,
+    animated: PropTypes.bool,
     visibleItems: PropTypes.number,
     width: PropTypes.number,
     onSegmentChange: PropTypes.func,

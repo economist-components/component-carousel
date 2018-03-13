@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+const transitionProps = [ 'transition', 'WebkitTransition', 'MozTransition', 'OTransition', 'msTransition' ];
 function findTouch(touches, identifier) {
   return Reflect.apply(
     Array.prototype.find,
@@ -16,13 +17,15 @@ export default class CarouselScroller extends React.Component {
   constructor(props) {
     super(props);
 
-    this.handleScroll = this.handleScroll.bind(this);
+    this.handleScrollRequest = this.handleScrollRequest.bind(this);
     this.handleRefContainer = this.handleRefContainer.bind(this);
     this.handleTransitionEnd = this.handleTransitionEnd.bind(this);
     this.handleTouchStart = this.handleTouchStart.bind(this);
     this.handleTouchMove = this.handleTouchMove.bind(this);
     this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.isTransitionSupported = false;
+    this.isTransitionEnabled = false;
     this.activeTouch = null;
     this.currSegment = 0;
     this.state = {
@@ -31,13 +34,20 @@ export default class CarouselScroller extends React.Component {
       maxScroll: -Infinity,
     };
     props.onConstructed({
-      scroll: this.handleScroll,
+      scroll: this.handleScrollRequest,
       resize: this.handleResize,
     });
   }
 
   componentDidMount() {
-    this.setState(this.getScrollState); // eslint-disable-line react/no-did-mount-set-state
+    const element = this.refContainer;
+    // We need to check if transtions are enabled.
+    // If not, then we need to short-circuit handleTransitionEnd
+    // in componentDidUpdate.
+    this.isTransitionSupported = transitionProps.some((prop) => typeof element.style[prop] !== 'undefined');
+
+    // eslint-disable-next-line react/no-did-mount-set-state
+    this.setState(this.getScrollState);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -53,12 +63,28 @@ export default class CarouselScroller extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    const { currScroll } = this.state;
+    const { isAnimated } = this.props;
+    if (currScroll !== prevState.currScroll) {
+      // If there was supposed to be a transition but the transition is *NOT* supported,
+      // we want to fire the end of transition ourselves.
+      if (this.isTransitionEnabled && (!this.isTransitionSupported || !isAnimated)) {
+        this.handleTransitionEnd();
+      }
+
+      if (!this.isTransitionEnabled) {
+        this.handleScrollChange();
+      }
+    }
+  }
+
   handleRefContainer(element) {
     this.refContainer = element;
   }
 
-  handleScroll(direction) {
-    setTimeout(this.props.onScrollStart);
+  handleScrollRequest(direction) {
+    this.isTransitionEnabled = true;
     this.setState((prevState, props) => {
       const { minScroll, maxScroll } = prevState;
       const { scrollSize } = props;
@@ -67,21 +93,20 @@ export default class CarouselScroller extends React.Component {
         Math.max(prevState.currScroll - distance, maxScroll),
         minScroll
       );
+      if (currScroll !== prevState.currScroll) {
+        setTimeout(this.props.onScrollStart);
+      }
+
       return {
         currScroll,
       };
     });
   }
 
-  handleTransitionEnd(evt) {
+  handleScrollChange() {
     const { currScroll, maxScroll, minScroll } = this.state;
     const { scrollSnapSize } = this.props;
     const currSegment = scrollSnapSize && Math.round(Math.abs(currScroll - minScroll) / scrollSnapSize);
-    if (evt.target !== evt.currentTarget) {
-      return;
-    }
-
-    setTimeout(this.props.onScrollEnd);
     if (currScroll === maxScroll) {
       setTimeout(this.props.onReachedEnd());
     }
@@ -94,6 +119,18 @@ export default class CarouselScroller extends React.Component {
       setTimeout(() => this.props.onSegmentChange(currSegment));
       this.currSegment = currSegment;
     }
+
+    this.isTransitionEnabled = false;
+  }
+
+  handleTransitionEnd(evt) {
+    // When we fire the transition end manually there is no event passed.
+    if (evt && evt.target !== evt.currentTarget) {
+      return;
+    }
+
+    setTimeout(this.props.onScrollEnd);
+    this.handleScrollChange();
   }
 
   handleTouchStart(evt) {
@@ -122,7 +159,7 @@ export default class CarouselScroller extends React.Component {
     const positionProp = isVertical ? 'clientY' : 'clientX';
     const delta = position - currTouch[positionProp];
     if (Math.abs(delta) >= scrollDeadSize) {
-      this.handleScroll(Math.sign(delta));
+      this.handleScrollRequest(Math.sign(delta));
       // Once the scroll is launched, we consider the touch sequence finished.
       this.handleTouchEnd(evt);
     }
@@ -146,6 +183,10 @@ export default class CarouselScroller extends React.Component {
     this.setState(this.getScrollState);
   }
 
+  // Used to recalculate scroll state (min, max, current)
+  // in case of resize or orientation change.
+  // It ensures that the current scroll is within limits
+  // and still reflects current segement.
   getScrollState(state, props) {
     // First get new scroll boundries.
     const { isVertical, listSize, scrollSnapSize } = props;
@@ -178,16 +219,20 @@ export default class CarouselScroller extends React.Component {
   }
 
   render() {
-    const { isVertical } = this.props;
+    const { isVertical, isAnimated } = this.props;
     const { currScroll } = this.state;
-    const scrollerClass = `carousel-scroller--hwaccelerated carousel-scroller-${ isVertical ? 'y' : 'x' }`;
+    const scrollerClass = [ 'carousel-scroller', `carousel-scroller-${ isVertical ? 'y' : 'x' }` ];
     const scrollerStyle = {
       transform: `translate3d(${ isVertical ? 0 : currScroll }px, ${ isVertical ? currScroll : 0 }px, 0px`,
     };
+    if (this.isTransitionSupported && this.isTransitionEnabled && isAnimated) {
+      scrollerClass.push('carousel-scroller--transitioned');
+    }
+
     return (
       <div className="carousel-scroller__container" ref={this.handleRefContainer}>
         <div
-          className={scrollerClass}
+          className={scrollerClass.join(' ')}
           style={scrollerStyle}
           onTransitionEnd={this.handleTransitionEnd}
           onTouchStart={this.handleTouchStart}
@@ -207,6 +252,7 @@ function noop() {
 
 CarouselScroller.defaultProps = {
   isVertical: false,
+  isAnimated: true,
   scrollSize: 0,
   scrollDeadSize: 1,
   onConstructed: noop,
@@ -221,6 +267,7 @@ if (process.env.NODE_ENV !== 'production') {
   CarouselScroller.propTypes = {
     children: PropTypes.node,
     isVertical: PropTypes.bool,
+    isAnimated: PropTypes.bool,
     scrollDeadSize: PropTypes.number,
     scrollSnapSize: PropTypes.number,
     scrollSize: PropTypes.number,

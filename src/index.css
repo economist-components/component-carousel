@@ -44,8 +44,11 @@
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
-.carousel-scroller--hwaccelerated {
+.carousel-scroller {
   transform: tanslate3d(0, 0, 0);
+}
+
+.carousel-scroller--transitioned {
   transition: transform ease-in-out 400ms;
 }
 
