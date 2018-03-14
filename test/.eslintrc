@@ -3,5 +3,8 @@
     "strict",
     "strict-react",
     "strict/test"
-  ]
+  ],
+  "rules": {
+    "no-unused-expressions": "off"
+  }
 }

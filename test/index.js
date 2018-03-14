@@ -1,5 +1,9 @@
 import 'babel-polyfill';
 import Carousel from '../src';
+import CarouselControl from '../src/parts/carousel-control';
+import CarouselList from '../src/parts/carousel-list';
+import CarouselItem from '../src/parts/carousel-item';
+import CarouselScroller from '../src/parts/carousel-scroller';
 import { horizontalNodes } from '../src/example';
 import React from 'react';
 import Enzyme from 'enzyme';
@@ -17,130 +21,135 @@ describe('Carousel', () => {
   });
 
   describe('Rendering', () => {
-    let rendered = null;
-    let carousel = null;
+    let mounted = null;
     beforeEach(() => {
-      rendered = mount(
+      mounted = mount(
         <Carousel
           nextButton={<span>▶</span>}
           previousButton={<span>◀</span>}
           gutter={10}
-          visibleItems={4}
+          visibleItems={1}
+          animated={false}
         >
           {horizontalNodes}
         </Carousel>
       );
-      rendered.setState({ isInitialPosition: false, isFinalPosition: false });
-      carousel = rendered.find('.carousel');
+      mounted.setState({ isInitialPosition: false, isFinalPosition: false });
+    });
+
+    afterEach(() => {
+      mounted.unmount();
     });
 
     it('renders a top level div.carousel', () => {
-      carousel.should.have.tagName('div');
-      carousel.should.have.className('carousel');
+      mounted.should.have.tagName('div');
+      mounted.should.have.className('carousel');
     });
 
     it('renders correctly the list of elements', () => {
-      carousel.should.have.exactly(1).descendants('.carousel__list');
-      carousel.find('.carousel__list').should.have.exactly(5).descendants('.carousel__item');
-      carousel.should.have.exactly(1).descendants('.carousel__control--next');
-      carousel.should.have.exactly(1).descendants('.carousel__control--previous');
+      mounted.should.have.exactly(1).descendants(CarouselList);
+      mounted.find(CarouselList).should.have.exactly(5).descendants(CarouselItem);
+      mounted.should.have.exactly(2).descendants(CarouselControl);
+      mounted.should.have.exactly(1).descendants(CarouselScroller);
     });
 
     it('computes the correct padding and margin', () => {
-      const carouselList = carousel.find('.carousel__list');
-      carouselList.children().forEach((carouselItem) => {
-        carouselItem.should.have.style('paddingRight', '5px');
-        carouselItem.should.have.style('paddingLeft', '5px');
+      const carouselList = mounted.find(CarouselList);
+      carouselList.find(CarouselItem).forEach((carouselItem) => {
+        carouselItem.should.have.style('padding-right', '5px');
+        carouselItem.should.have.style('padding-left', '5px');
       });
       carouselList.should.have.style('marginLeft', '-5px');
       carouselList.should.have.style('marginRight', '-5px');
     });
 
-    it('computes the correct dimensions', () => {
-      const carouselInstance = new Carousel();
-      carouselInstance.computeDimensions({ offsetWidth: 90 }, 4, 10, false).should.equal(25);
-    });
-
     it('displays the correct controls', () => {
-      const controlNext = carousel.find('.carousel__control--next');
-      const controlPrevious = carousel.find('.carousel__control--previous');
+      const controls = mounted.find(CarouselControl);
+      const controlNext = controls.filter({ direction: 'next' });
+      const controlPrevious = controls.filter({ direction: 'previous' });
       controlNext.should.not.have.style('display');
       controlPrevious.should.not.have.style('display');
       controlNext.find('span').should.have.text('▶');
       controlPrevious.find('span').should.have.text('◀');
     });
 
-    it('responds correctly to nextButton click', () => {
-      const spiedHandleNextClick = chai.spy(rendered.instance().handleNextClick);
-      rendered.instance().handleNextClick = spiedHandleNextClick;
-      carousel.find('.carousel__control--next').simulate('click');
-      spiedHandleNextClick.should.have.been.called.exactly(1);
+    it('dispatches onScrollStart and onScrollEnd after nextButton click', (done) => {
+      const onScrollStart = chai.spy();
+      function onScrollEnd() {
+        onScrollStart.should.have.been.called.once;
+        done();
+      }
+      mounted.setProps({ onScrollStart, onScrollEnd });
+      mounted.find(CarouselControl).filter({ direction: 'next' }).simulate('click');
     });
 
-    it('responds correctly to previousButton click', () => {
-      const spiedHandlePreviousClick = chai.spy(rendered.instance().handlePreviousClick);
-      rendered.instance().handlePreviousClick = spiedHandlePreviousClick;
-      carousel.find('.carousel__control--previous').simulate('click');
-      spiedHandlePreviousClick.should.have.been.called.exactly(1);
+    it('dispatches onScrollStart and onScrollEnd after previousButton click', (done) => {
+      const onScrollStart = chai.spy();
+      function onScrollEnd() {
+        onScrollStart.should.have.been.called.once;
+        done();
+      }
+      mounted.find(CarouselControl).filter({ direction: 'next' }).simulate('click');
+      mounted.setProps({ onScrollStart, onScrollEnd });
+      mounted.find(CarouselControl).filter({ direction: 'previous' }).simulate('click');
+    });
+
+    it('dispatches onSegmentChange when nextButton click changes segment', (done) => {
+      function onSegmentChange(segment) {
+        segment.should.be.equal(1);
+        done();
+      }
+      mounted.setProps({ onSegmentChange });
+      mounted.find(CarouselControl).filter({ direction: 'next' }).simulate('click');
+    });
+
+    it('dispatches onSegmentChange when previousButton click changes segment', (done) => {
+      function onSegmentChange(segment) {
+        segment.should.be.equal(1);
+        done();
+      }
+      mounted.find(CarouselControl).filter({ direction: 'next' }).simulate('click');
+      mounted.setProps({ onSegmentChange });
+      mounted.find(CarouselControl).filter({ direction: 'previous' }).simulate('click');
     });
 
     it('hides previousButton when on start', () => {
-      rendered.setState({ isInitialPosition: true });
-      carousel.find('.carousel__control--previous').should.not.have.style('display');
+      mounted.setState({ isInitialPosition: true });
+      mounted.find('.carousel__control--previous').should.not.have.style('display');
     });
 
     it('hides nextButton when on end', () => {
-      rendered.setState({ isFinalPosition: true });
-      carousel.find('.carousel__control--next').should.not.have.style('display');
+      mounted.setState({ isFinalPosition: true });
+      mounted.find('.carousel__control--next').should.not.have.style('display');
     });
   });
 
   describe('Rendering with hideArrowsOnEdges prop', () => {
-    let rendered = null;
-    let carousel = null;
+    let mounted = null;
     beforeEach(() => {
-      rendered = mount(
+      mounted = mount(
         <Carousel
           nextButton={<span>▶</span>}
           previousButton={<span>◀</span>}
           gutter={10}
-          visibleItems={4}
+          visibleItems={1}
           hideArrowsOnEdges
+          animated={false}
         >
           {horizontalNodes}
         </Carousel>
       );
-      rendered.setState({ isInitialPosition: false, isFinalPosition: false });
-      carousel = rendered.find('.carousel');
+      mounted.setState({ isInitialPosition: false, isFinalPosition: false });
     });
 
     it('hides previousButton when on start', () => {
-      rendered.setState({ isInitialPosition: true });
-      carousel.find('.carousel__control--previous').should.have.style('display', 'none');
+      mounted.setState({ isInitialPosition: true });
+      mounted.find('.carousel__control--previous').should.have.style('display', 'none');
     });
 
     it('hides nextButton when on end', () => {
-      rendered.setState({ isFinalPosition: true });
-      carousel.find('.carousel__control--next').should.have.style('display', 'none');
-    });
-  });
-
-  describe('onScrollerCreated callback', () => {
-    it('calls the callback when the scroller is created', () => {
-      const spiedOnScrollerCreated = chai.spy((scroller) => scroller);
-      const rendered = mount(
-        <Carousel
-          onScrollerCreated={spiedOnScrollerCreated}
-          nextButton={<span>▶</span>}
-          previousButton={<span>◀</span>}
-          gutter={10}
-          visibleItems={4}
-        >
-          {horizontalNodes}
-        </Carousel>
-      );
-      spiedOnScrollerCreated.should.have.been.called.exactly(1);
-      spiedOnScrollerCreated.should.have.been.called.with(rendered.instance().scroller);
+      mounted.setState({ isFinalPosition: true });
+      mounted.find('.carousel__control--next').should.have.style('display', 'none');
     });
   });
 });
