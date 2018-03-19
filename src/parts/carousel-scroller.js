@@ -203,7 +203,9 @@ export default class CarouselScroller extends React.Component {
 
     if (absDirectionDelta >= scrollDeadSize) {
       activeTouch.hasTriggeredScroll = true;
-      this.handleScrollRequest(Math.sign(directionDelta));
+      // We schedule scroll request further on the event loop
+      // just in case transitionend is already waiting there.
+      setTimeout(() => this.handleScrollRequest(Math.sign(directionDelta)));
     }
   }
 
