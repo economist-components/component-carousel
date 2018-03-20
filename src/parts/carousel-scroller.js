@@ -1,3 +1,4 @@
+/* global window */
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -24,14 +25,15 @@ export default class CarouselScroller extends React.Component {
     this.handleTouchMove = this.handleTouchMove.bind(this);
     this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.handlePageTouchMove = this.handlePageTouchMove.bind(this);
     this.isTransitionSupported = false;
-    this.isTransitionEnabled = false;
     this.activeTouch = null;
     this.currSegment = 0;
     this.state = {
       currScroll: 0,
       minScroll: 0,
       maxScroll: -Infinity,
+      isTransitionEnabled: false,
     };
     props.onConstructed({
       scroll: this.handleScrollRequest,
@@ -48,6 +50,9 @@ export default class CarouselScroller extends React.Component {
 
     // eslint-disable-next-line react/no-did-mount-set-state
     this.setState(this.getScrollState);
+    if (typeof window === 'object') {
+      window.addEventListener('touchmove', this.handlePageTouchMove, { capture: true, passive: false });
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -64,18 +69,25 @@ export default class CarouselScroller extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { currScroll } = this.state;
+    const { currScroll, isTransitionEnabled } = this.state;
     const { isAnimated } = this.props;
     if (currScroll !== prevState.currScroll) {
-      // If there was supposed to be a transition but the transition is *NOT* supported,
+      // If there was supposed to be a transition
+      // but the transition is *NOT* supported nor desired,
       // we want to fire the end of transition ourselves.
-      if (this.isTransitionEnabled && (!this.isTransitionSupported || !isAnimated)) {
+      if (isTransitionEnabled && (!this.isTransitionSupported || !isAnimated)) {
         this.handleTransitionEnd();
       }
 
-      if (!this.isTransitionEnabled) {
+      if (!isTransitionEnabled) {
         this.handleScrollChange();
       }
+    }
+  }
+
+  componentWillUnmount() {
+    if (typeof window === 'object') {
+      window.removeEventListener('touchmove', this.handlePageTouchMove);
     }
   }
 
@@ -84,9 +96,9 @@ export default class CarouselScroller extends React.Component {
   }
 
   handleScrollRequest(direction) {
-    this.isTransitionEnabled = true;
     this.setState((prevState, props) => {
       const { minScroll, maxScroll } = prevState;
+      let { isTransitionEnabled } = prevState;
       const { scrollSize } = props;
       const distance = Math.sign(direction) * scrollSize;
       const currScroll = Math.min(
@@ -94,11 +106,13 @@ export default class CarouselScroller extends React.Component {
         minScroll
       );
       if (currScroll !== prevState.currScroll) {
+        isTransitionEnabled = true;
         setTimeout(this.props.onScrollStart);
       }
 
       return {
         currScroll,
+        isTransitionEnabled,
       };
     });
   }
@@ -120,7 +134,9 @@ export default class CarouselScroller extends React.Component {
       this.currSegment = currSegment;
     }
 
-    this.isTransitionEnabled = false;
+    this.setState({
+      isTransitionEnabled: false,
+    });
   }
 
   handleTransitionEnd(evt) {
@@ -136,32 +152,60 @@ export default class CarouselScroller extends React.Component {
   handleTouchStart(evt) {
     // There can be multiple touches, but we always track the first one.
     const [ touch ] = evt.touches;
-    const { isVertical } = this.props;
-    const positionProp = isVertical ? 'clientY' : 'clientX';
     this.activeTouch = {
-      position: touch[positionProp],
+      clientX: touch.clientX,
+      clientY: touch.clientY,
       identifier: touch.identifier,
+      hasTriggeredScroll: false,
+      hasDirection: false,
     };
   }
 
   handleTouchMove(evt) {
-    if (!this.activeTouch) {
+    const { activeTouch } = this;
+    if (!activeTouch) {
       return;
     }
 
-    const { identifier, position } = this.activeTouch;
+    const { identifier, hasTriggeredScroll } = activeTouch;
+    if (hasTriggeredScroll) {
+      return;
+    }
+
     const currTouch = findTouch(evt.changedTouches, identifier);
     if (!currTouch) {
+      this.activeTouch = null;
       return;
     }
 
     const { isVertical, scrollDeadSize } = this.props;
-    const positionProp = isVertical ? 'clientY' : 'clientX';
-    const delta = position - currTouch[positionProp];
-    if (Math.abs(delta) >= scrollDeadSize) {
-      this.handleScrollRequest(Math.sign(delta));
-      // Once the scroll is launched, we consider the touch sequence finished.
-      this.handleTouchEnd(evt);
+    // We need to track touch movement in both the chosen direction
+    // as well as perpendicular in order to figure out
+    // if the movement is supposed to trigger carousel or page scroll.
+    const directionProp = isVertical ? 'clientY' : 'clientX';
+    const perpendicularProp = isVertical ? 'clientX' : 'clientY';
+    const directionDelta = activeTouch[directionProp] - currTouch[directionProp];
+    const perpendicularDelta = activeTouch[perpendicularProp] - currTouch[perpendicularProp];
+    const absDirectionDelta = Math.abs(directionDelta);
+    const absPerpendicularDelta = Math.abs(perpendicularDelta);
+    // If touch movement was more in perpendicular direction before we triggered the carousel scroll,
+    // then we abandon touch tracking and thus let the browser take care of page scroll.
+    if (!hasTriggeredScroll && absDirectionDelta <= absPerpendicularDelta) {
+      this.activeTouch = null;
+      return;
+    }
+
+    // We want to figure out early on if the touch movement is going in the right direction
+    // so that we can disable page scroll.
+    if (absDirectionDelta > absPerpendicularDelta) {
+      activeTouch.hasDirection = true;
+    }
+
+    if (absDirectionDelta >= scrollDeadSize) {
+      activeTouch.hasTriggeredScroll = true;
+      // We schedule scroll request further on the event loop
+      // just in case transitionend is already waiting there.
+      setTimeout(() => this.handleScrollRequest(Math.sign(directionDelta)));
     }
   }
 
@@ -181,6 +225,15 @@ export default class CarouselScroller extends React.Component {
 
   handleResize() {
     this.setState(this.getScrollState);
+  }
+
+  handlePageTouchMove(evt) {
+    // If active touch triggered carousel scroll, then we don't want
+    // to have the same touch trigger page scroll.
+    // This way we are preventing page and carousel scroll at the same time.
+    if (this.activeTouch && this.activeTouch.hasDirection) {
+      evt.preventDefault();
+    }
   }
 
   // Used to recalculate scroll state (min, max, current)
@@ -220,12 +273,12 @@ export default class CarouselScroller extends React.Component {
 
   render() {
     const { isVertical, isAnimated } = this.props;
-    const { currScroll } = this.state;
-    const scrollerClass = [ 'carousel-scroller', `carousel-scroller-${ isVertical ? 'y' : 'x' }` ];
+    const { currScroll, isTransitionEnabled } = this.state;
+    const scrollerClass = [ 'carousel-scroller', `carousel-scroller--${ isVertical ? 'y' : 'x' }` ];
     const scrollerStyle = {
       transform: `translate3d(${ isVertical ? 0 : currScroll }px, ${ isVertical ? currScroll : 0 }px, 0px`,
     };
-    if (this.isTransitionSupported && this.isTransitionEnabled && isAnimated) {
+    if (this.isTransitionSupported && isTransitionEnabled && isAnimated) {
       scrollerClass.push('carousel-scroller--transitioned');
     }
 
